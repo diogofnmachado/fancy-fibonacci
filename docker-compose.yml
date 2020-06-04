@@ -1,0 +1,63 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+  redis:
+    image: 'redis:latest'
+  nginx:
+    depends_on:
+      - api
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - '5050:80'
+  api:
+    depends_on:
+      - postgres
+    build: 
+      #Especify the name of the dockerfile
+      dockerfile: Dockerfile.dev
+      #Localtion of the files
+      context: ./server
+    volumes:
+      #Leave this folder on the container as is 
+      - /app/node_modules
+      #Link /app/* to local ./server/* to avoid rebuilding
+      - ./server:/app
+    environment: 
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  client:
+    #React app to exit when starting with Docker Compose
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes: 
+      #Leave this folder on the container as is
+      - /app/node_modules
+      #Link /app/* to local ./client/* to avoid rebuilding
+      - ./client:/app
+
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes: 
+      #Leave this folder on the container as is
+      - /app/node_modules
+      #Link /app/* to local ./client/* to avoid rebuilding
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379  
