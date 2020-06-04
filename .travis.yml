@@ -25,5 +25,19 @@ after_success:
   - docker push diogofnmachado/fancy-server
   - docker push diogofnmachado/fancy-worker
 
+#deploy:
+#  edge: true
+#  provider: elasticbeanstalk
+#  region: us-west-1
+#  app: fancy-fibonacci
+#  env: FancyFib-env
+#  bucket_name:
+#  bucket_path: fancy-fib
+#  on:
+#    branch: master
+#  access_key_id: $AWS_ACCESS_KEY
+#  secret_access_key:
+#    secure: $AWS_SECRET_KEY
+  
 
 
