@@ -1,0 +1,29 @@
+language: generic 
+sudo: required
+services:
+  - docker
+
+before_install:
+  #Dev Dockerfile for tests
+  - docker build -t diogofnmachado/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  #Run tests
+  - docker run -e CI=true diogofnmachado/react-test npm test
+
+after_success:
+  #Build the prod version, using the prod Dockerfile
+  - docker build -t diogofnmachado/fancy-client ./client
+  - docker build -t diogofnmachado/fancy-nginx ./nginx
+  - docker build -t diogofnmachado/fancy-server ./server
+  - docker build -t diogofnmachado/fancy-worker ./worker
+  #Login to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push images to docker hub
+  - docker push diogofnmachado/fancy-client
+  - docker push diogofnmachado/fancy-nginx
+  - docker push diogofnmachado/fancy-server
+  - docker push diogofnmachado/fancy-worker
+
+
+
